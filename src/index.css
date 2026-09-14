@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-zinc-800;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-zinc-950 text-zinc-50 antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes zoom-in-95 {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-in { animation-fill-mode: both; }
+.fade-in { animation-name: fade-in; }
+.zoom-in-95 { animation-name: zoom-in-95; }
+.duration-200 { animation-duration: 200ms; }
+.duration-500 { animation-duration: 500ms; }
