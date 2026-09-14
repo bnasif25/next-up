@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { StoreProvider } from '@/lib/store';
 import Today from '@/sections/Today';
 import History from '@/sections/History';
+import Progress from '@/sections/Progress';
 import Settings from '@/sections/Settings';
 
-type Tab = 'today' | 'history' | 'settings';
+type Tab = 'today' | 'progress' | 'history' | 'settings';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'today', label: 'Today', icon: '⚡' },
-  { id: 'history', label: 'History', icon: '📈' },
+  { id: 'progress', label: 'Progress', icon: '📈' },
+  { id: 'history', label: 'History', icon: '📓' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
@@ -17,6 +19,7 @@ function Shell() {
   return (
     <div className="min-h-dvh bg-zinc-950 text-zinc-50 max-w-md mx-auto relative">
       {tab === 'today' && <Today />}
+      {tab === 'progress' && <Progress />}
       {tab === 'history' && <History />}
       {tab === 'settings' && <Settings />}
 
