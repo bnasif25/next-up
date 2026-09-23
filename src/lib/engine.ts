@@ -14,7 +14,7 @@ export function roundTo(weight: number, inc: number): number {
   return Math.round((Math.round(weight / inc) * inc) * 100) / 100;
 }
 
-/** Add an increment to the previous weight — never re-snap to a grid,
+/** Add an increment to the previous weight: never re-snap to a grid,
  *  or +2.5 kg on a 56 kg lift would silently become +1.5 kg. */
 export function addInc(prev: number, inc: number): number {
   return Math.round((prev + inc) * 100) / 100;
@@ -75,7 +75,7 @@ export function suggestExercise(
   const last = hist[0]?.log;
 
   if (!last || last.sets.every((s) => !s.done)) {
-    return { sets: ex.sets.map(() => ({ weight: null, status: 'calib' })), warmup: [], message: 'First time here — log what you lift. Suggestions start next session.' };
+    return { sets: ex.sets.map(() => ({ weight: null, status: 'calib' })), warmup: [], message: 'First time here: log what you lift. Suggestions start next session.' };
   }
 
   const misses = consecutiveMisses(state, ex, phase);
@@ -98,10 +98,10 @@ export function suggestExercise(
       sets,
       warmup: ex.warmup ? warmupFor(sets[0].weight ?? 0) : [],
       message: deloadAll
-        ? 'Two misses in a row — dropping ~10 %, build back up.'
+        ? 'Two misses in a row: dropping ~10%, build back up.'
         : allHit
-          ? `Targets hit — add ${fmtKg(inc)} kg to every set.`
-          : 'Same weight — chase the targets again.',
+          ? `Targets hit: add ${fmtKg(inc)} kg to every set.`
+          : 'Same weight: chase the targets again.',
     };
   }
 
@@ -125,10 +125,10 @@ export function suggestExercise(
       sets,
       warmup: [],
       message: deloadAll
-        ? 'Two misses in a row — dropping ~10 %, build back up.'
+        ? 'Two misses in a row: dropping ~10%, build back up.'
         : up
-          ? `15 + 6/6/6 nailed — add ${fmtKg(inc)} kg next time.`
-          : 'Same weight — aim for 15, then 6 on every mini-set.',
+          ? `15 + 6/6/6 nailed: add ${fmtKg(inc)} kg next time.`
+          : 'Same weight: aim for 15, then 6 on every mini-set.',
     };
   }
 
@@ -148,8 +148,8 @@ export function suggestExercise(
       sets,
       warmup: [],
       message: allHit
-        ? `Top reps on every set — add ${fmtKg(inc)} kg across the board.`
-        : 'Same weights — push each set one rep further.',
+        ? `Top reps on every set: add ${fmtKg(inc)} kg across the board.`
+        : 'Same weights: push each set one rep further.',
     };
   }
 
@@ -167,10 +167,10 @@ export function suggestExercise(
     sets,
     warmup: ex.warmup ? warmupFor(sets[0].weight ?? 0) : [],
     message: deloadAll
-      ? 'Two misses on your heavy set — dropping ~10 %, build back up.'
+      ? 'Two misses on your heavy set: dropping ~10%, build back up.'
       : anyUp
-        ? 'Top of range hit — the marked sets go up.'
-        : 'Same weight — add reps before you add plates.',
+        ? 'Top of range hit: the marked sets go up.'
+        : 'Same weight: add reps before you add plates.',
   };
 }
 

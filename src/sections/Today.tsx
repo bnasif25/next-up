@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Check, Trophy } from '@phosphor-icons/react';
 import type { AppState, DraftSession, ExerciseDef, ExerciseLog, SessionLog, WorkoutId } from '@/types';
 import { PROGRAM } from '@/data/program';
 import {
@@ -10,7 +11,7 @@ import {
   suggestExercise,
 } from '@/lib/engine';
 import { useStore } from '@/lib/store';
-import Stepper from '@/components/Stepper';
+import NumberField from '@/components/NumberField';
 import RestTimer from '@/components/RestTimer';
 import GoalsCard from '@/components/GoalsCard';
 
@@ -24,16 +25,23 @@ function lastTimeText(state: AppState, ex: ExerciseDef, phase: number): string |
   if (!last) return null;
   const parts = last.sets
     .filter((s) => s.done)
-    .map((s) => `${weightLabel(ex, s.weight)}${s.weight === 0 && (ex.attachedOnly || ex.bodyweightOk) ? '' : ' kg'} × ${s.reps}`);
+    .map((s) => `${weightLabel(ex, s.weight)}${s.weight === 0 && (ex.attachedOnly || ex.bodyweightOk) ? '' : ' kg'} x ${s.reps}`);
   return parts.length ? `Last: ${parts.join(' · ')}` : null;
 }
 
 const STATUS_BADGE: Record<string, { text: string; cls: string }> = {
   up: { text: '▲ up', cls: 'text-green-400' },
-  deload: { text: '▼ −10%', cls: 'text-orange-400' },
+  deload: { text: '▼ -10%', cls: 'text-orange-400' },
   hold: { text: '= hold', cls: 'text-zinc-500' },
   calib: { text: 'log it', cls: 'text-zinc-500' },
 };
+
+/** After ticking a set, bring the next undone set into view (attention motion). */
+function scrollToNextUndone() {
+  setTimeout(() => {
+    document.querySelector('[data-done="false"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+}
 
 export default function Today() {
   const { state, setDraft, saveSession, setState, clearBanner } = useStore();
@@ -48,7 +56,7 @@ export default function Today() {
       const def = PROGRAM[info.phase - 1];
       setState((s) => ({
         ...s,
-        banner: `Phase ${info.phase} unlocked — ${def.name}. New exercises, same grind.`,
+        banner: `Phase ${info.phase} unlocked: ${def.name}. New exercises, same grind.`,
       }));
     }
   }, [info.autoAdvanced, info.phase, state.banner, setState]);
@@ -119,11 +127,11 @@ export default function Today() {
   if (info.programComplete && !draft) {
     return (
       <div className="px-5 pt-16 pb-28 text-center animate-in fade-in duration-500">
-        <p className="text-6xl mb-6">🏛️</p>
+        <Trophy size={64} weight="duotone" className="mx-auto mb-6 text-[#E7C464]" />
         <h1 className="text-3xl font-bold text-zinc-50 mb-3">Program complete.</h1>
         <p className="text-zinc-400 mb-2">Six months of Greek God 2.0 in the books.</p>
         <p className="text-zinc-500 text-sm mb-10">
-          Check History to see how far the numbers climbed — then run it back heavier.
+          Check History to see how far the numbers climbed, then run it back heavier.
         </p>
         <button
           onClick={() =>
@@ -146,7 +154,7 @@ export default function Today() {
     return (
       <div className="px-5 pt-16 pb-28 text-center animate-in fade-in zoom-in-95 duration-500">
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#E7C464]/15 flex items-center justify-center">
-          <span className="text-4xl">✓</span>
+          <Check size={40} weight="bold" className="text-[#E7C464]" />
         </div>
         <h1 className="text-3xl font-bold text-zinc-50 mb-2">Workout {finished} logged.</h1>
         <p className="text-zinc-400 mb-10">
@@ -171,7 +179,7 @@ export default function Today() {
             onClick={clearBanner}
             className="w-full text-left rounded-2xl border border-[#E7C464]/40 bg-[#E7C464]/10 p-4 text-sm text-[#E7C464]"
           >
-            {state.banner} <span className="float-right text-zinc-500">dismiss ✕</span>
+            {state.banner} <span className="float-right text-zinc-500">dismiss</span>
           </button>
         )}
 
@@ -185,7 +193,10 @@ export default function Today() {
               <p className="text-xl font-bold text-zinc-50">{workout.title}</p>
               <p className="text-sm text-zinc-400">{workout.focus}</p>
               <p className="text-xs text-zinc-500 mt-1">
-                Phase {info.phase} · Week {info.week} of {phaseDef.weeks} · {phaseDef.name}
+                Phase {info.phase} · {phaseDef.name}
+              </p>
+              <p className="text-xs text-zinc-500">
+                Week {info.week} of {phaseDef.weeks}
               </p>
             </div>
           </div>
@@ -197,7 +208,7 @@ export default function Today() {
             const s1 = sug.sets[0];
             const scheme = ex.sets[0];
             const target =
-              scheme.min === scheme.max ? `${scheme.min}` : `${scheme.min}–${scheme.max}`;
+              scheme.min === scheme.max ? `${scheme.min}` : `${scheme.min}-${scheme.max}`;
             return (
               <div key={ex.id} className="flex items-center justify-between px-5 py-4">
                 <div>
@@ -267,6 +278,7 @@ export default function Today() {
         const lastText = lastTimeText(state, ex, draft.phase);
         const isRestPause = ex.style === 'restpause' && ex.miniSets;
         const sharedWeight = log.sets[0]?.weight ?? 0;
+        const weightUnit = ex.perHand ? 'kg / hand' : 'kg';
 
         const setSet = (setIdx: number, patch: Partial<{ weight: number; reps: number; done: boolean }>) =>
           updateDraft((d) => {
@@ -288,15 +300,15 @@ export default function Today() {
 
         return (
           <div key={ex.id} className="rounded-3xl border border-zinc-800 bg-zinc-900/60 overflow-hidden">
-            <div className="px-5 pt-4 pb-2">
+            <div className="px-4 pt-4 pb-2">
               <p className="font-bold text-lg text-zinc-50">{ex.name}</p>
               <p className="text-xs text-zinc-500">
-                {ex.style === 'rpt' && 'Reverse pyramid · '}
-                {ex.style === 'kino' && 'Kino rep · '}
-                {ex.style === 'restpause' && 'Rest-pause · '}
-                {ex.style === 'straight' && 'Straight sets · '}
-                rest {ex.restSeconds >= 60 ? `${ex.restSeconds / 60} min` : `${ex.restSeconds} s`}
-                {ex.perHand ? ' · per hand' : ''}
+                {ex.style === 'rpt' && 'Reverse pyramid'}
+                {ex.style === 'kino' && 'Kino rep'}
+                {ex.style === 'restpause' && 'Rest-pause'}
+                {ex.style === 'straight' && 'Straight sets'}
+                {' · rest '}
+                {ex.restSeconds >= 60 ? `${ex.restSeconds / 60} min` : `${ex.restSeconds} s`}
               </p>
               {lastText && <p className="text-xs text-[#E7C464]/80 mt-1">{lastText}</p>}
               {sug.message && !lastText && <p className="text-xs text-zinc-500 mt-1">{sug.message}</p>}
@@ -305,7 +317,7 @@ export default function Today() {
 
             {/* warmup sets */}
             {ex.warmup && sug.warmup.length > 0 && (
-              <div className="mx-4 mb-2 rounded-2xl bg-zinc-950/60 border border-zinc-800/60 px-4 py-2">
+              <div className="mx-3 mb-2 rounded-2xl bg-zinc-950/60 border border-zinc-800/60 px-4 py-2">
                 <p className="text-[10px] uppercase tracking-widest text-zinc-600 py-1">Warmup</p>
                 {sug.warmup.map((w, i) => {
                   const key = `${ex.id}-w${i}`;
@@ -314,17 +326,17 @@ export default function Today() {
                     <button
                       key={key}
                       onClick={() => setWarmupTicks((t) => ({ ...t, [key]: !t[key] }))}
-                      className="w-full flex items-center justify-between py-2 text-sm active:scale-[0.99] transition-transform"
+                      className="w-full min-h-12 flex items-center justify-between py-2 text-sm active:scale-[0.99] transition-transform"
                     >
                       <span className={ticked ? 'text-zinc-600 line-through' : 'text-zinc-400'}>
-                        {fmtKg(w.weight)} kg × {w.reps}
+                        {fmtKg(w.weight)} kg x {w.reps}
                       </span>
                       <span
-                        className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs ${
+                        className={`w-7 h-7 rounded-full border flex items-center justify-center ${
                           ticked ? 'bg-[#E7C464] border-[#E7C464] text-zinc-950' : 'border-zinc-700 text-transparent'
                         }`}
                       >
-                        ✓
+                        <Check size={14} weight="bold" />
                       </span>
                     </button>
                   );
@@ -333,108 +345,132 @@ export default function Today() {
             )}
 
             {/* working sets */}
-            <div className="px-4 pb-4 space-y-2">
+            <div className="px-3 pb-3 space-y-2.5">
               {log.sets.map((set, i) => {
                 const scheme = ex.sets[i];
-                const target = scheme.min === scheme.max ? `${scheme.min}` : `${scheme.min}–${scheme.max}`;
-                const badge = STATUS_BADGE[sug.sets[i]?.status ?? 'hold'];
+                const target = scheme.min === scheme.max ? `${scheme.min}` : `${scheme.min}-${scheme.max}`;
+                const status = sug.sets[i]?.status ?? 'hold';
+                const badge = STATUS_BADGE[status];
                 return (
                   <div
                     key={i}
-                    className={`flex items-center justify-between gap-2 rounded-2xl px-3 py-2.5 transition-colors ${
-                      set.done ? 'bg-[#E7C464]/10 border border-[#E7C464]/30' : 'bg-zinc-950/60 border border-zinc-800/60'
+                    data-done={set.done}
+                    className={`rounded-2xl border transition-colors ${
+                      set.done
+                        ? 'border-[#E7C464]/40 bg-[#E7C464]/[0.07]'
+                        : 'border-zinc-800 bg-zinc-950/50'
                     }`}
                   >
-                    <div className="w-16">
-                      <p className="text-[10px] uppercase tracking-wide text-zinc-500">Set {i + 1}</p>
-                      <p className="text-sm font-bold text-zinc-300">{target}</p>
-                      {!set.done && sug.sets[i] && sug.sets[i].status !== 'hold' && sug.sets[i].status !== 'calib' && (
-                        <p className={`text-[10px] font-semibold ${badge.cls}`}>{badge.text}</p>
-                      )}
+                    {/* row 1: label + confirm. The check is pinned here so it can never clip. */}
+                    <div className="flex items-center justify-between pl-4 pr-2.5 py-1.5">
+                      <div className="flex items-baseline gap-2 min-w-0">
+                        <span className="text-[10px] uppercase tracking-widest text-zinc-500 shrink-0">
+                          Set {i + 1}
+                        </span>
+                        <span className="text-base font-bold text-zinc-200">{target} reps</span>
+                        {!set.done && status !== 'hold' && status !== 'calib' && (
+                          <span className={`text-[11px] font-semibold ${badge.cls}`}>{badge.text}</span>
+                        )}
+                      </div>
+                      <button
+                        aria-label={`confirm set ${i + 1} of ${ex.name}`}
+                        onClick={() => {
+                          if (set.done) {
+                            setSet(i, { done: false });
+                          } else {
+                            setSet(i, { done: true });
+                            setTimer({ seconds: ex.restSeconds, label: ex.name });
+                            scrollToNextUndone();
+                          }
+                        }}
+                        className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center active:scale-90 transition-all ${
+                          set.done
+                            ? 'bg-[#E7C464] text-zinc-950 shadow-[0_0_20px_rgba(231,196,100,0.4)]'
+                            : 'bg-zinc-800 text-zinc-500 border border-zinc-700'
+                        }`}
+                      >
+                        <Check size={26} weight="bold" />
+                      </button>
                     </div>
-                    <Stepper
-                      value={set.weight}
-                      step={inc}
-                      onChange={(v) => setSet(i, { weight: v })}
-                      display={weightLabel(ex, set.weight)}
-                      unit={set.weight > 0 ? (ex.perHand ? 'kg/hand' : 'kg') : undefined}
-                      disabled={set.done}
-                    />
-                    <Stepper
-                      value={set.reps}
-                      step={1}
-                      onChange={(v) => setSet(i, { reps: v })}
-                      unit="reps"
-                      disabled={set.done}
-                    />
-                    <button
-                      onClick={() => {
-                        if (set.done) {
-                          setSet(i, { done: false });
-                        } else {
-                          setSet(i, { done: true });
-                          setTimer({ seconds: ex.restSeconds, label: ex.name });
-                        }
-                      }}
-                      className={`w-12 h-12 rounded-full text-xl font-black active:scale-90 transition-all ${
-                        set.done
-                          ? 'bg-[#E7C464] text-zinc-950 shadow-[0_0_20px_rgba(231,196,100,0.4)]'
-                          : 'bg-zinc-800 text-zinc-500'
-                      }`}
-                      aria-label="toggle set done"
-                    >
-                      ✓
-                    </button>
+                    {/* row 2: weight + reps, grid so it fits any phone width */}
+                    <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+                      <NumberField
+                        ariaLabel={`${ex.name} set ${i + 1} weight`}
+                        value={set.weight}
+                        step={inc}
+                        onChange={(v) => setSet(i, { weight: v })}
+                        unit={set.weight > 0 ? weightUnit : undefined}
+                        displayOverride={(ex.attachedOnly || ex.bodyweightOk) && set.weight === 0 ? 'BW' : undefined}
+                        disabled={set.done}
+                      />
+                      <NumberField
+                        ariaLabel={`${ex.name} set ${i + 1} reps`}
+                        value={set.reps}
+                        step={1}
+                        onChange={(v) => setSet(i, { reps: Math.round(v) })}
+                        unit="reps"
+                        numericOnly
+                        disabled={set.done}
+                      />
+                    </div>
                   </div>
                 );
               })}
 
-              {/* rest-pause mini-sets */}
+              {/* rest-pause mini-sets: shared weight, reps + confirm only */}
               {isRestPause &&
                 log.miniSets!.map((mini, mi) => (
                   <div
                     key={`m${mi}`}
-                    className={`flex items-center justify-between gap-2 rounded-2xl px-3 py-2.5 transition-colors ${
+                    data-done={mini.done}
+                    className={`rounded-2xl border transition-colors ${
                       mini.done
-                        ? 'bg-[#E7C464]/10 border border-[#E7C464]/30'
-                        : 'bg-zinc-950/60 border border-zinc-800/60'
+                        ? 'border-[#E7C464]/40 bg-[#E7C464]/[0.07]'
+                        : 'border-zinc-800 bg-zinc-950/50'
                     }`}
                   >
-                    <div className="w-16">
-                      <p className="text-[10px] uppercase tracking-wide text-zinc-500">Mini {mi + 1}</p>
-                      <p className="text-sm font-bold text-zinc-300">
-                        {ex.miniSets!.min}–{ex.miniSets!.max}
-                      </p>
+                    <div className="flex items-center justify-between pl-4 pr-2.5 py-1.5">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-[10px] uppercase tracking-widest text-zinc-500">Mini {mi + 1}</span>
+                        <span className="text-base font-bold text-zinc-200">
+                          {ex.miniSets!.min}-{ex.miniSets!.max} reps
+                        </span>
+                        <span className="text-xs text-zinc-500 tabular-nums">
+                          {weightLabel(ex, sharedWeight)}
+                          {sharedWeight > 0 ? ` ${weightUnit}` : ''}
+                        </span>
+                      </div>
+                      <button
+                        aria-label={`confirm mini-set ${mi + 1} of ${ex.name}`}
+                        onClick={() => {
+                          if (mini.done) {
+                            setMini(mi, { done: false });
+                          } else {
+                            setMini(mi, { done: true });
+                            setTimer({ seconds: ex.miniSets!.restSeconds, label: `${ex.name}, mini-set` });
+                            scrollToNextUndone();
+                          }
+                        }}
+                        className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center active:scale-90 transition-all ${
+                          mini.done
+                            ? 'bg-[#E7C464] text-zinc-950 shadow-[0_0_20px_rgba(231,196,100,0.4)]'
+                            : 'bg-zinc-800 text-zinc-500 border border-zinc-700'
+                        }`}
+                      >
+                        <Check size={26} weight="bold" />
+                      </button>
                     </div>
-                    <span className="text-sm text-zinc-500 tabular-nums min-w-[4.5rem] text-center">
-                      {weightLabel(ex, sharedWeight)}
-                      {sharedWeight > 0 && <span className="block text-[10px] uppercase">kg</span>}
-                    </span>
-                    <Stepper
-                      value={mini.reps}
-                      step={1}
-                      onChange={(v) => setMini(mi, { reps: v })}
-                      unit="reps"
-                      disabled={mini.done}
-                    />
-                    <button
-                      onClick={() => {
-                        if (mini.done) {
-                          setMini(mi, { done: false });
-                        } else {
-                          setMini(mi, { done: true });
-                          setTimer({ seconds: ex.miniSets!.restSeconds, label: `${ex.name} · mini-set` });
-                        }
-                      }}
-                      className={`w-12 h-12 rounded-full text-xl font-black active:scale-90 transition-all ${
-                        mini.done
-                          ? 'bg-[#E7C464] text-zinc-950 shadow-[0_0_20px_rgba(231,196,100,0.4)]'
-                          : 'bg-zinc-800 text-zinc-500'
-                      }`}
-                      aria-label="toggle mini-set done"
-                    >
-                      ✓
-                    </button>
+                    <div className="px-3 pb-3">
+                      <NumberField
+                        ariaLabel={`${ex.name} mini-set ${mi + 1} reps`}
+                        value={mini.reps}
+                        step={1}
+                        onChange={(v) => setMini(mi, { reps: Math.round(v) })}
+                        unit="reps"
+                        numericOnly
+                        disabled={mini.done}
+                      />
+                    </div>
                   </div>
                 ))}
             </div>
@@ -446,7 +482,7 @@ export default function Today() {
         <button
           onClick={finish}
           disabled={doneSets === 0}
-          className="w-full py-4 rounded-3xl bg-[#E7C464] text-zinc-950 text-lg font-black tracking-wide active:scale-[0.98] transition-transform disabled:opacity-30 shadow-[0_8px_40px_rgba(231,196,100,0.25)]"
+          className="w-full max-w-md mx-auto block py-4 rounded-3xl bg-[#E7C464] text-zinc-950 text-lg font-black tracking-wide active:scale-[0.98] transition-transform disabled:opacity-30 shadow-[0_8px_40px_rgba(231,196,100,0.25)]"
         >
           FINISH WORKOUT · {doneSets}/{totalSets}
         </button>

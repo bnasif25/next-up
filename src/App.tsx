@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Lightning, ChartLineUp, Notebook, GearSix } from '@phosphor-icons/react';
 import { StoreProvider } from '@/lib/store';
 import Today from '@/sections/Today';
 import History from '@/sections/History';
@@ -7,11 +8,11 @@ import Settings from '@/sections/Settings';
 
 type Tab = 'today' | 'progress' | 'history' | 'settings';
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'today', label: 'Today', icon: '⚡' },
-  { id: 'progress', label: 'Progress', icon: '📈' },
-  { id: 'history', label: 'History', icon: '📓' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
+const TABS: { id: Tab; label: string; icon: typeof Lightning }[] = [
+  { id: 'today', label: 'Today', icon: Lightning },
+  { id: 'progress', label: 'Progress', icon: ChartLineUp },
+  { id: 'history', label: 'History', icon: Notebook },
+  { id: 'settings', label: 'Settings', icon: GearSix },
 ];
 
 function Shell() {
@@ -33,7 +34,7 @@ function Shell() {
                 tab === t.id ? 'text-[#E7C464]' : 'text-zinc-600'
               }`}
             >
-              <span className="text-lg">{t.icon}</span>
+              <t.icon size={22} weight={tab === t.id ? 'fill' : 'regular'} />
               <span className="text-[10px] font-semibold uppercase tracking-wider">{t.label}</span>
             </button>
           ))}

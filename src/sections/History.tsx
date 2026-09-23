@@ -1,3 +1,4 @@
+import { Notebook } from '@phosphor-icons/react';
 import { getExercise } from '@/data/program';
 import { fmtKg } from '@/lib/engine';
 import { useStore } from '@/lib/store';
@@ -9,7 +10,7 @@ export default function History() {
   if (sessions.length === 0) {
     return (
       <div className="px-5 pt-16 pb-28 text-center">
-        <p className="text-5xl mb-4">📓</p>
+        <Notebook size={56} weight="duotone" className="mx-auto mb-4 text-zinc-600" />
         <h1 className="text-2xl font-bold text-zinc-50 mb-2">No sessions yet</h1>
         <p className="text-zinc-500 text-sm">Your logged workouts will stack up here.</p>
       </div>
@@ -56,7 +57,7 @@ export default function History() {
                   <div key={l.exerciseId} className="flex items-baseline justify-between gap-3">
                     <p className="text-sm text-zinc-300 shrink-0">{ex.name}</p>
                     <p className="text-xs text-zinc-500 tabular-nums text-right">
-                      {setsText || '—'}
+                      {setsText || 'not logged'}
                       {minis && <span className="text-zinc-600"> +{minis}</span>}
                     </p>
                   </div>

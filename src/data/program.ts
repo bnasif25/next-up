@@ -1,12 +1,12 @@
 import type { ExerciseDef, PhaseDef, WorkoutDef } from '@/types';
 
 /**
- * Greek God Program 2.0 (Strength & Density) — extracted verbatim from the
+ * Greek God Program 2.0 (Strength & Density): extracted verbatim from the
  * user's program document. All weights kg. Phase 3 reuses Phase 1 workouts.
  *
  * Rest defaults (seconds) per the document:
- *  RPT compounds 180 · RPT isolations 120 · Kino rep 60–90 (legs 120) ·
- *  rest-pause mini-sets 10–15 · abs ~60.
+ *  RPT compounds 180 · RPT isolations 120 · Kino rep 60-90 (legs 120) ·
+ *  rest-pause mini-sets 10-15 · abs ~60.
  */
 
 const inclineBarbellPress: ExerciseDef = {
@@ -19,7 +19,7 @@ const inclineBarbellPress: ExerciseDef = {
   restSeconds: 180,
   incrementKg: 2.5,
   warmup: true,
-  note: 'Heaviest set first. Leave a rep in the tank on sets 2–3.',
+  note: 'Heaviest set first. Leave a rep in the tank on sets 2-3.',
 };
 
 const standingPress: ExerciseDef = {
@@ -54,7 +54,7 @@ const lateralRaises: ExerciseDef = {
   incrementKg: 2,
   perHand: true,
   miniSets: { count: 3, min: 4, max: 6, restSeconds: 12 },
-  note: 'Same weight for activation + mini-sets. 10–15 s rests only.',
+  note: 'Same weight for activation + mini-sets. 10-15 s rests only.',
 };
 
 const hangingKneeRaises: ExerciseDef = {
@@ -66,7 +66,7 @@ const hangingKneeRaises: ExerciseDef = {
   restSeconds: 60,
   incrementKg: 2.5,
   bodyweightOk: true,
-  note: 'Bodyweight is fine — hold a weight between your legs when 3 × 12 gets easy.',
+  note: 'Bodyweight is fine: hold a weight between your legs when 3 × 12 gets easy.',
 };
 
 const weightedChinups: ExerciseDef = {
@@ -80,7 +80,7 @@ const weightedChinups: ExerciseDef = {
   incrementKg: 1.25,
   attachedOnly: true,
   warmup: true,
-  note: 'Log the belt weight only — bodyweight sets are "BW". No belt yet? Do 3 sets at bodyweight.',
+  note: 'Log the belt weight only: bodyweight sets are "BW". No belt yet? Do 3 sets at bodyweight.',
 };
 
 const inclineHammerCurls: ExerciseDef = {
@@ -229,7 +229,7 @@ const boxSquats: ExerciseDef = {
   ascendHint: 12.5,
   restSeconds: 120,
   incrementKg: 2.5,
-  note: 'Add weight each set. Too heavy by set 4–5? Stay at that weight.',
+  note: 'Add weight each set. Too heavy by set 4-5? Stay at that weight.',
 };
 
 const singleLegRdl: ExerciseDef = {

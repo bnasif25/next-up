@@ -1,3 +1,4 @@
+import { ChartLineUp } from '@phosphor-icons/react';
 import { TOTAL_WEEKS } from '@/data/program';
 import { fmtKg } from '@/lib/engine';
 import { INDICATORS, seriesFor, type Point } from '@/lib/progress';
@@ -78,7 +79,7 @@ export default function Progress() {
 
       {cards.length === 0 ? (
         <div className="text-center pt-16">
-          <p className="text-5xl mb-4">📈</p>
+          <ChartLineUp size={56} weight="duotone" className="mx-auto mb-4 text-zinc-600" />
           <h2 className="text-xl font-bold text-zinc-50 mb-2">Nothing to plot yet</h2>
           <p className="text-zinc-500 text-sm px-8">
             Log a couple of sessions and your indicator lifts will start climbing here.

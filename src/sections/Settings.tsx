@@ -30,7 +30,7 @@ export default function Settings() {
       <section className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5">
         <p className="text-xs uppercase tracking-widest text-zinc-500 mb-3">Phase</p>
         <p className="text-sm text-zinc-300 mb-1">
-          Currently: <span className="font-bold text-[#E7C464]">Phase {info.phase} — {PROGRAM[info.phase - 1].name}</span>
+          Currently: <span className="font-bold text-[#E7C464]">Phase {info.phase}, {PROGRAM[info.phase - 1].name}</span>
           {state.settings.phaseOverride ? ' (locked)' : ' (automatic)'}
         </p>
         <p className="text-xs text-zinc-500 mb-4">
@@ -62,7 +62,7 @@ export default function Settings() {
                   return {
                     ...s,
                     settings: { ...s.settings, phaseStartDates, phaseOverride: null },
-                    banner: `Phase ${next} — ${PROGRAM[next - 1].name}. Let's go.`,
+                    banner: `Phase ${next}: ${PROGRAM[next - 1].name}. Let's go.`,
                   };
                 })
               }
